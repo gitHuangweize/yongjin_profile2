@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Huang Yongjin | Embedded Linux Engineer</title>
+    
+    <!-- Google Fonts: Fira Code for that coding look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind CSS (via CDN as requested for no build tools) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom Theme Config for Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'term-green': '#4af626',
+                        'term-bg': '#0d1117',
+                        'term-dark': '#001e00',
+                    },
+                    fontFamily: {
+                        mono: ['"Fira Code"', 'monospace'],
+                    },
+                    boxShadow: {
+                        'glow': '0 0 10px #4af626',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom CSS to enhance the Terminal Feel */
+        body {
+            background-color: #0d1117;
+            color: #4af626;
+            font-family: 'Fira Code', monospace;
+            overflow-x: hidden;
+        }
+
+        /* CRT Screen Scanline Effect */
+        .scanline {
+            width: 100%;
+            height: 100px;
+            z-index: 10;
+            background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(74, 246, 38, 0.04) 50%, rgba(0,0,0,0) 100%);
+            opacity: 0.1;
+            background-size: 100% 100%;
+            position: fixed;
+            pointer-events: none;
+            animation: scanline 10s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% { top: -100px; }
+            100% { top: 100%; }
+        }
+
+        /* Text Glow */
+        .text-glow {
+            text-shadow: 0 0 5px rgba(74, 246, 38, 0.5);
+        }
+
+        /* Blinking Cursor */
+        .cursor::after {
+            content: '█';
+            animation: blink 1s step-end infinite;
+            margin-left: 2px;
+            color: #4af626;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0d1117; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4af626; 
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2cb512; 
+        }
+
+        /* Image Grayscale & Green Tint */
+        .term-img {
+            filter: grayscale(100%) sepia(100%) hue-rotate(90deg) saturate(300%) contrast(0.8);
+            transition: all 0.3s ease;
+        }
+        .term-img:hover {
+            filter: grayscale(0%) sepia(0%);
+            box-shadow: 0 0 15px #4af626;
+        }
+
+        /* Link Hover Effects */
+        .hover-command:hover::before {
+            content: '> ';
+            color: #4af626;
+        }
+        .hover-command {
+            transition: padding-left 0.2s;
+        }
+        .hover-command:hover {
+            padding-left: 10px;
+            text-shadow: 0 0 8px #4af626;
+        }
+
+        /* Utility for typing animation visibility */
+        .typing-hidden {
+            opacity: 0;
+        }
+        .typing-visible {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="selection:bg-term-green selection:text-black antialiased">
+
+    <!-- Retro Scanline Overlay -->
+    <div class="scanline"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full bg-term-bg/90 backdrop-blur border-b border-term-green/30 z-50 py-4 px-4 md:px-8">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <div class="text-xl font-bold text-glow">
+                <span class="text-term-green">root@portfolio</span>:<span class="text-blue-400">~</span>$
+            </div>
+            
+            <ul class="hidden md:flex space-x-8 text-sm">
+                <li><a href="#hero" class="hover:text-white hover-command">[ ./home ]</a></li>
+                <li><a href="#about" class="hover:text-white hover-command">[ ./about ]</a></li>
+                <li><a href="#skills" class="hover:text-white hover-command">[ ./skills ]</a></li>
+                <li><a href="#projects" class="hover:text-white hover-command">[ ./projects ]</a></li>
+            </ul>
+
+            <!-- Mobile Menu Button -->
+            <button id="mobile-menu-btn" class="md:hidden text-term-green hover:text-white">
+                <i class="fas fa-bars fa-lg"></i>
+            </button>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden absolute top-full left-0 w-full bg-term-bg border-b border-term-green/30 p-4">
+            <ul class="flex flex-col space-y-4">
+                <li><a href="#hero" class="block hover:bg-term-green/20 p-2">[ ./home ]</a></li>
+                <li><a href="#about" class="block hover:bg-term-green/20 p-2">[ ./about ]</a></li>
+                <li><a href="#skills" class="block hover:bg-term-green/20 p-2">[ ./skills ]</a></li>
+                <li><a href="#projects" class="block hover:bg-term-green/20 p-2">[ ./projects ]</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-5xl mx-auto px-4 pt-24 pb-12">
+
+        <!-- Hero Section -->
+        <section id="hero" class="min-h-[80vh] flex flex-col justify-center mb-24">
+            <div class="mb-4 text-sm opacity-70">
+                Last login: <span id="current-date"></span> on tty1
+            </div>
+            
+            <div class="text-4xl md:text-6xl font-bold mb-6 text-glow">
+                <span id="hero-title" class="cursor"></span>
+            </div>
+            
+            <h2 class="text-xl md:text-2xl text-gray-300 mb-8 typing-container" data-text="Embedded Linux Software Engineer | Kernel Hacker | IoT Solutions">
+                <!-- Text injected by JS -->
+            </h2>
+            
+            <div class="flex gap-4 opacity-0 fade-in-delay" style="animation: fadeIn 0.5s forwards 2.5s;">
+                <a href="mailto:example@email.com" class="border-2 border-term-green text-term-green hover:bg-term-green hover:text-black px-6 py-3 font-bold transition-all duration-300 shadow-glow">
+                    <i class="fas fa-terminal mr-2"></i>./contact_me.sh
+                </a>
+                <a href="#projects" class="border-2 border-gray-600 text-gray-400 hover:border-gray-400 hover:text-gray-200 px-6 py-3 transition-all duration-300">
+                    cat projects.txt
+                </a>
+            </div>
+        </section>
+
+        <!-- About Me -->
+        <section id="about" class="mb-32 scroll-mt-24">
+            <div class="border border-term-green/50 p-1 mb-8 inline-block">
+                <h3 class="bg-term-green/20 px-4 py-1 text-lg font-bold">
+                    <i class="fas fa-user-astronaut mr-2"></i>nano about_me.txt
+                </h3>
+            </div>
+            
+            <div class="flex flex-col md:flex-row gap-12 items-center">
+                <div class="w-full md:w-1/3">
+                    <div class="relative group">
+                        <!-- Pseudo-corners for tech look -->
+                        <div class="absolute -top-2 -left-2 w-4 h-4 border-t-2 border-l-2 border-term-green"></div>
+                        <div class="absolute -bottom-2 -right-2 w-4 h-4 border-b-2 border-r-2 border-term-green"></div>
+                        <img src="https://picsum.photos/400/400?grayscale" alt="Profile" class="w-full h-auto term-img border border-term-green/30">
+                    </div>
+                </div>
+                <div class="w-full md:w-2/3">
+                    <p class="mb-4 leading-relaxed text-gray-300">
+                        <span class="text-term-green font-bold">></span> 您好，我是<strong class="text-white">黄勇锦</strong>。
+                    </p>
+                    <p class="mb-4 leading-relaxed text-gray-300 typing-scroll" data-text="我是一名拥有 4 年经验的嵌入式 Linux 软件工程师。我热衷于探索硬件与软件的底层交互，擅长将复杂的硬件功能转化为稳定高效的软件服务。">
+                        <!-- JS typing -->
+                    </p>
+                    <p class="mb-6 leading-relaxed text-gray-300 typing-scroll" data-text="我的职业生涯专注于工业网关开发、Linux 内核驱动适配以及网络协议栈的优化。在我的代码世界里，不仅有 0 和 1，更有对极致性能和稳定性的追求。">
+                        <!-- JS typing -->
+                    </p>
+                    
+                    <div class="grid grid-cols-2 gap-4 text-sm text-gray-400">
+                        <div><i class="fas fa-map-marker-alt mr-2"></i>Location: China</div>
+                        <div><i class="fas fa-briefcase mr-2"></i>Experience: 4 Years</div>
+                        <div><i class="fas fa-graduation-cap mr-2"></i>Degree: Computer Science</div>
+                        <div><i class="fas fa-laptop-code mr-2"></i>Focus: Linux/BSP/IoT</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Skills Section -->
+        <section id="skills" class="mb-32 scroll-mt-24">
+            <div class="border border-term-green/50 p-1 mb-8 inline-block">
+                <h3 class="bg-term-green/20 px-4 py-1 text-lg font-bold">
+                    <i class="fas fa-microchip mr-2"></i>top -b -n 1 | grep 'SKILLS'
+                </h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                
+                <!-- Technical Stack (Progress Bars) -->
+                <div class="space-y-6">
+                    <h4 class="text-white border-b border-gray-700 pb-2 mb-4">Core Modules</h4>
+                    
+                    <!-- Skill Item -->
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span>Embedded Linux / Driver</span>
+                            <span>90%</span>
+                        </div>
+                        <div class="w-full bg-gray-800 h-4 border border-gray-700">
+                            <div class="bg-term-green h-full loading-bar" style="width: 0%" data-width="90%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Skill Item -->
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span>C / C++ / Shell</span>
+                            <span>95%</span>
+                        </div>
+                        <div class="w-full bg-gray-800 h-4 border border-gray-700">
+                            <div class="bg-term-green h-full loading-bar" style="width: 0%" data-width="95%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Skill Item -->
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span>WiFi / Bluetooth / Zigbee</span>
+                            <span>85%</span>
+                        </div>
+                        <div class="w-full bg-gray-800 h-4 border border-gray-700">
+                            <div class="bg-term-green h-full loading-bar" style="width: 0%" data-width="85%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Skill Item -->
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span>Network Protocols (TCP/MQTT)</span>
+                            <span>80%</span>
+                        </div>
+                        <div class="w-full bg-gray-800 h-4 border border-gray-700">
+                            <div class="bg-term-green h-full loading-bar" style="width: 0%" data-width="80%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tag Cloud (Terminal Style) -->
+                <div>
+                    <h4 class="text-white border-b border-gray-700 pb-2 mb-4">Installed Packages</h4>
+                    <div class="flex flex-wrap gap-3">
+                        <span class="border border-term-green text-term-green px-3 py-1 hover:bg-term-green hover:text-black cursor-crosshair transition-colors">gcc</span>
+                        <span class="border border-term-green text-term-green px-3 py-1 hover:bg-term-green hover:text-black cursor-crosshair transition-colors">gdb</span>
+                        <span class="border border-term-green text-term-green px-3 py-1 hover:bg-term-green hover:text-black cursor-crosshair transition-colors">U-Boot</span>
+                        <span class="border border-term-green text-term-green px-3 py-1 hover:bg-term-green hover:text-black cursor-crosshair transition-colors">Buildroot</span>
+                        <span class="border border-term-green text-term-green px-3 py-1 hover:bg-term-green hover:text-black cursor-crosshair transition-colors">Yocto</span>
+                        <span class="border border-term-green text-term-green px-3 py-1 hover:bg-term-green hover:text-black cursor-crosshair transition-colors">Make/CMake</span>
+                        <span class="border border-term-green text-term-green px-3 py-1 hover:bg-term-green hover:text-black cursor-crosshair transition-colors">Git</span>
+                        <span class="border border-term-green text-term-green px-3 py-1 hover:bg-term-green hover:text-black cursor-crosshair transition-colors">FreeRTOS</span>
+                        <span class="border border-term-green text-term-green px-3 py-1 hover:bg-term-green hover:text-black cursor-crosshair transition-colors">Modbus</span>
+                        <span class="border border-term-green text-term-green px-3 py-1 hover:bg-term-green hover:text-black cursor-crosshair transition-colors">SPI/I2C/UART</span>
+                        <span class="border border-term-green text-term-green px-3 py-1 hover:bg-term-green hover:text-black cursor-crosshair transition-colors">Python</span>
+                        <span class="border border-term-green text-term-green px-3 py-1 hover:bg-term-green hover:text-black cursor-crosshair transition-colors">Docker</span>
+                    </div>
+                    
+                    <div class="mt-8 p-4 bg-gray-900 border-l-4 border-term-green font-mono text-xs text-gray-400">
+                        <p>$ check_dependency --all</p>
+                        <p class="text-term-green">All dependencies satisfied.</p>
+                        <p>System ready for complex IoT architecture.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Projects Section -->
+        <section id="projects" class="mb-24 scroll-mt-24">
+            <div class="border border-term-green/50 p-1 mb-8 inline-block">
+                <h3 class="bg-term-green/20 px-4 py-1 text-lg font-bold">
+                    <i class="fas fa-folder-open mr-2"></i>ls -la ./projects/
+                </h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                
+                <!-- Project Card 1 -->
+                <article class="border border-gray-700 bg-black hover:border-term-green transition-colors duration-300 group flex flex-col h-full">
+                    <div class="h-48 overflow-hidden relative border-b border-gray-800">
+                        <div class="absolute inset-0 bg-term-green/10 z-10 hidden group-hover:block"></div>
+                        <img src="https://picsum.photos/seed/tech1/600/400" alt="Project 1" class="w-full h-full object-cover term-img">
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col">
+                        <h4 class="text-xl font-bold mb-2 group-hover:text-glow">工业级边缘计算网关</h4>
+                        <p class="text-sm text-gray-400 mb-4 flex-grow">基于 ARM Cortex-A53 架构，实现了多协议转换（Modbus 到 MQTT）。优化了 Linux 内核网络栈，支持 4G/5G 链路自动切换与断点续传功能。</p>
+                        <div class="text-xs text-term-green mb-4 font-mono">
+                            [C] [Linux] [MQTT] [SQLite]
+                        </div>
+                        <a href="#" class="inline-block w-full text-center border border-gray-600 py-2 text-sm hover:bg-term-green hover:text-black hover:border-term-green transition-all">
+                            ./view_details.sh
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Project Card 2 -->
+                <article class="border border-gray-700 bg-black hover:border-term-green transition-colors duration-300 group flex flex-col h-full">
+                    <div class="h-48 overflow-hidden relative border-b border-gray-800">
+                        <div class="absolute inset-0 bg-term-green/10 z-10 hidden group-hover:block"></div>
+                        <img src="https://picsum.photos/seed/tech2/600/400" alt="Project 2" class="w-full h-full object-cover term-img">
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col">
+                        <h4 class="text-xl font-bold mb-2 group-hover:text-glow">智能家居 OTA 升级系统</h4>
+                        <p class="text-sm text-gray-400 mb-4 flex-grow">设计并实现了一套安全可靠的远程升级（OTA）机制。包含差分包生成、双分区引导（A/B System）、数字签名校验，确保设备在升级失败时能自动回滚。</p>
+                        <div class="text-xs text-term-green mb-4 font-mono">
+                            [Shell] [U-Boot] [Security]
+                        </div>
+                        <a href="#" class="inline-block w-full text-center border border-gray-600 py-2 text-sm hover:bg-term-green hover:text-black hover:border-term-green transition-all">
+                            ./view_details.sh
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Project Card 3 -->
+                <article class="border border-gray-700 bg-black hover:border-term-green transition-colors duration-300 group flex flex-col h-full">
+                    <div class="h-48 overflow-hidden relative border-b border-gray-800">
+                        <div class="absolute inset-0 bg-term-green/10 z-10 hidden group-hover:block"></div>
+                        <img src="https://picsum.photos/seed/tech3/600/400" alt="Project 3" class="w-full h-full object-cover term-img">
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col">
+                        <h4 class="text-xl font-bold mb-2 group-hover:text-glow">WiFi 6 路由器驱动优化</h4>
+                        <p class="text-sm text-gray-400 mb-4 flex-grow">负责 OpenWrt 环境下 WiFi 驱动的移植与性能调优。解决了高并发下的吞吐量瓶颈问题，提升了 30% 的数据转发效率。</p>
+                        <div class="text-xs text-term-green mb-4 font-mono">
+                            [OpenWrt] [Kernel] [WiFi 6]
+                        </div>
+                        <a href="#" class="inline-block w-full text-center border border-gray-600 py-2 text-sm hover:bg-term-green hover:text-black hover:border-term-green transition-all">
+                            ./view_details.sh
+                        </a>
+                    </div>
+                </article>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-800 bg-black py-8">
+        <div class="max-w-5xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
+            <div class="mb-4 md:mb-0 text-gray-500 text-sm">
+                <p>&copy; 2023 Huang Yongjin. All systems operational.</p>
+                <p class="text-xs mt-1">Powered by HTML5, CSS3, Coffee & Linux</p>
+            </div>
+            <div class="flex space-x-6">
+                <a href="https://github.com" target="_blank" class="text-gray-400 hover:text-term-green hover:text-glow transition-all">
+                    <i class="fab fa-github fa-2x"></i>
+                </a>
+                <a href="mailto:email@example.com" class="text-gray-400 hover:text-term-green hover:text-glow transition-all">
+                    <i class="fas fa-envelope fa-2x"></i>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-term-green hover:text-glow transition-all">
+                    <i class="fab fa-linkedin fa-2x"></i>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+
+    <!-- JavaScript logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // 1. Set current date in header
+            const dateEl = document.getElementById('current-date');
+            if (dateEl) {
+                dateEl.innerText = new Date().toDateString();
+            }
+
+            // 2. Typewriter Effect Function
+            function typeWriter(element, text, speed = 50, callback) {
+                let i = 0;
+                element.innerHTML = '';
+                // Remove cursor class initially to prevent double cursor
+                element.classList.remove('cursor'); 
+                // Add a temporary cursor span
+                const cursorSpan = document.createElement('span');
+                cursorSpan.className = 'cursor';
+                element.appendChild(cursorSpan);
+
+                function type() {
+                    if (i < text.length) {
+                        // Insert text before the cursor
+                        cursorSpan.before(text.charAt(i));
+                        i++;
+                        setTimeout(type, speed);
+                    } else {
+                        // Animation finished
+                        if (callback) callback();
+                    }
+                }
+                type();
+            }
+
+            // 3. Start Hero Animations
+            const heroTitle = document.getElementById('hero-title');
+            const heroSubtitle = document.querySelector('.typing-container');
+            
+            // Type Name
+            typeWriter(heroTitle, "echo 'Hello World!';", 100, () => {
+                // After Name, Type Subtitle
+                // Slight delay
+                setTimeout(() => {
+                    // Remove cursor from title to keep it clean, or leave it. 
+                    // Let's create a visual line break effect
+                    heroTitle.classList.remove('cursor');
+                    
+                    if (heroSubtitle) {
+                        const text = heroSubtitle.getAttribute('data-text');
+                        typeWriter(heroSubtitle, text, 30);
+                    }
+                }, 500);
+            });
+
+            // 4. Scroll Intersection Observer for Sections
+            const observerOptions = {
+                threshold: 0.2
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        
+                        // Handle Text Typing in 'About' section
+                        const typingScrolls = entry.target.querySelectorAll('.typing-scroll');
+                        typingScrolls.forEach((el, index) => {
+                            if (!el.hasAttribute('data-typed')) {
+                                el.setAttribute('data-typed', 'true');
+                                setTimeout(() => {
+                                    const text = el.getAttribute('data-text');
+                                    typeWriter(el, text, 20); // Faster speed for long text
+                                }, index * 1000); // Stagger animations
+                            }
+                        });
+
+                        // Handle Progress Bars
+                        const progressBars = entry.target.querySelectorAll('.loading-bar');
+                        progressBars.forEach(bar => {
+                            const width = bar.getAttribute('data-width');
+                            bar.style.width = width;
+                            bar.style.transition = 'width 1.5s ease-out';
+                        });
+
+                        // Stop observing once triggered
+                        // observer.unobserve(entry.target); 
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('section').forEach(section => {
+                observer.observe(section);
+            });
+
+            // 5. Mobile Menu Toggle
+            const btn = document.getElementById('mobile-menu-btn');
+            const menu = document.getElementById('mobile-menu');
+
+            if (btn && menu) {
+                btn.addEventListener('click', () => {
+                    menu.classList.toggle('hidden');
+                });
+                
+                // Close menu when clicking a link
+                menu.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        menu.classList.add('hidden');
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+</html>
