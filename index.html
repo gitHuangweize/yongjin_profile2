@@ -185,9 +185,17 @@
             </h2>
             
             <div class="flex gap-4 opacity-0 fade-in-delay" style="animation: fadeIn 0.5s forwards 2.5s;">
-                <a href="mailto:huangyongjin3@126.com" class="border-2 border-term-green text-term-green hover:bg-term-green hover:text-black px-6 py-3 font-bold transition-all duration-300 shadow-glow">
-                    <i class="fas fa-terminal mr-2"></i>./contact_me.sh
-                </a>
+                <!-- FormSubmit: https://formsubmit.co/ -->
+                <form action="https://formsubmit.co/huangyongjin3@126.com" method="POST" class="inline-block">
+                    <!-- Disable Captcha (Optional) -->
+                    <input type="hidden" name="_captcha" value="false">
+                    <!-- Success Page (Optional) -->
+                    <input type="hidden" name="_next" value="https://githuangweize.github.io/yongjin_profile2/">
+                    
+                    <button type="submit" class="border-2 border-term-green text-term-green hover:bg-term-green hover:text-black px-6 py-3 font-bold transition-all duration-300 shadow-glow cursor-pointer">
+                        <i class="fas fa-terminal mr-2"></i>./contact_me.sh
+                    </button>
+                </form>
                 <a href="#projects" class="border-2 border-gray-600 text-gray-400 hover:border-gray-400 hover:text-gray-200 px-6 py-3 transition-all duration-300">
                     cat projects.txt
                 </a>
