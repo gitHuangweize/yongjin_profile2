@@ -422,50 +422,92 @@
                 dateEl.innerText = new Date().toDateString();
             }
 
-            // 2. Typewriter Effect Function
+            // 2. Typewriter Effect Function (for static text like About Me)
             function typeWriter(element, text, speed = 50, callback) {
                 let i = 0;
                 element.innerHTML = '';
-                // Remove cursor class initially to prevent double cursor
+                // Remove cursor class from parent if it exists to avoid double cursor
                 element.classList.remove('cursor'); 
-                // Add a temporary cursor span
+                // Add a child span for the cursor
                 const cursorSpan = document.createElement('span');
                 cursorSpan.className = 'cursor';
                 element.appendChild(cursorSpan);
 
                 function type() {
                     if (i < text.length) {
-                        // Insert text before the cursor
                         cursorSpan.before(text.charAt(i));
                         i++;
                         setTimeout(type, speed);
                     } else {
-                        // Animation finished
                         if (callback) callback();
                     }
                 }
                 type();
             }
 
-            // 3. Start Hero Animations
+            // 3. Hero Section Infinite Loop Animation
             const heroTitle = document.getElementById('hero-title');
             const heroSubtitle = document.querySelector('.typing-container');
             
-            // Type Name
-            typeWriter(heroTitle, "echo 'Hello World!';", 100, () => {
-                // After Name, Type Subtitle
-                // Slight delay
-                setTimeout(() => {
-                    // Remove cursor from title to keep it clean, or leave it. 
-                    // Let's create a visual line break effect
-                    heroTitle.classList.remove('cursor');
-                    
-                    if (heroSubtitle) {
-                        const text = heroSubtitle.getAttribute('data-text');
-                        typeWriter(heroSubtitle, text, 30);
+            // Phrases to cycle through
+            const phrases = [
+                "echo 'Hello World!';",
+                "Huang Yongjin"
+            ];
+            
+            let phraseIndex = 0;
+            let charIndex = 0;
+            let isDeleting = false;
+            let subtitleStarted = false;
+
+            function heroLoop() {
+                const currentPhrase = phrases[phraseIndex];
+                
+                // Use innerText manipulation for the hero title.
+                // The CSS class 'cursor' on #hero-title handles the blinking block via ::after
+                heroTitle.classList.add('cursor');
+                
+                if (isDeleting) {
+                    heroTitle.innerText = currentPhrase.substring(0, charIndex - 1);
+                    charIndex--;
+                } else {
+                    heroTitle.innerText = currentPhrase.substring(0, charIndex + 1);
+                    charIndex++;
+                }
+
+                let typeSpeed = 100;
+
+                if (!isDeleting && charIndex === currentPhrase.length) {
+                    // Finished typing the phrase
+                    typeSpeed = 2000; // Pause at the end
+                    isDeleting = true;
+
+                    // Start the subtitle animation only once, after the first phrase is fully typed
+                    if (!subtitleStarted && heroSubtitle) {
+                        subtitleStarted = true;
+                        // Small delay to separate visually
+                        setTimeout(() => {
+                            const text = heroSubtitle.getAttribute('data-text');
+                            typeWriter(heroSubtitle, text, 30);
+                        }, 500);
                     }
-                }, 500);
-            });
+
+                } else if (isDeleting && charIndex === 0) {
+                    // Finished deleting
+                    isDeleting = false;
+                    phraseIndex = (phraseIndex + 1) % phrases.length;
+                    typeSpeed = 500; // Pause before typing next
+                } else if (isDeleting) {
+                    typeSpeed = 50; // Delete faster
+                }
+
+                setTimeout(heroLoop, typeSpeed);
+            }
+
+            // Start the Hero Loop
+            if (heroTitle) {
+                setTimeout(heroLoop, 500);
+            }
 
             // 4. Scroll Intersection Observer for Sections
             const observerOptions = {
@@ -483,8 +525,8 @@
                                 el.setAttribute('data-typed', 'true');
                                 setTimeout(() => {
                                     const text = el.getAttribute('data-text');
-                                    typeWriter(el, text, 20); // Faster speed for long text
-                                }, index * 1000); // Stagger animations
+                                    typeWriter(el, text, 20); 
+                                }, index * 1000); 
                             }
                         });
 
@@ -495,9 +537,6 @@
                             bar.style.width = width;
                             bar.style.transition = 'width 1.5s ease-out';
                         });
-
-                        // Stop observing once triggered
-                        // observer.unobserve(entry.target); 
                     }
                 });
             }, observerOptions);
@@ -515,7 +554,6 @@
                     menu.classList.toggle('hidden');
                 });
                 
-                // Close menu when clicking a link
                 menu.querySelectorAll('a').forEach(link => {
                     link.addEventListener('click', () => {
                         menu.classList.add('hidden');
