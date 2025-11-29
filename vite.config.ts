@@ -10,6 +10,9 @@ export default defineConfig(({ mode, command }) => {
     
     return {
       base: isGitHubPages ? '/yongjin_profile2/' : '/',
+      css: {
+        postcss: './postcss.config.js',
+      },
       server: {
         port: 3000,
         host: '0.0.0.0',
