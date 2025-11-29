@@ -5,8 +5,8 @@ import { defineConfig, loadEnv } from 'vite';
 export default defineConfig(({ mode, command }) => {
     const env = loadEnv(mode, '.', '');
     // Check if we are building for GitHub Pages (you can set this env var in GitHub Actions)
-    // Or simply use '/' for Vercel as Vercel deploys to root domain
-    const isGitHubPages = mode === 'production' && process.env.GITHUB_PAGES === 'true';
+    // Default to '/' (root) for Vercel, Netlify, and local dev
+    const isGitHubPages = process.env.GITHUB_PAGES === 'true';
     
     return {
       base: isGitHubPages ? '/yongjin_profile2/' : '/',
